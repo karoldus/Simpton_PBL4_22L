@@ -1,6 +1,9 @@
 #MicroXplorer Configuration settings - do not modify
 File.Version=6
 KeepUserPlacement=false
+LPUART1.BaudRate=115200
+LPUART1.IPParameters=BaudRate,WordLength
+LPUART1.WordLength=UART_WORDLENGTH_8B
 Mcu.CPN=STM32L031G6U3
 Mcu.Family=STM32L0
 Mcu.IP0=I2C1
