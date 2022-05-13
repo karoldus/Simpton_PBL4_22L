@@ -57,6 +57,22 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define GPIO_BU_POUT_Pin GPIO_PIN_0
+#define GPIO_BU_POUT_GPIO_Port GPIOA
+#define GPIO_BU_TOUT_Pin GPIO_PIN_1
+#define GPIO_BU_TOUT_GPIO_Port GPIOA
+#define GPIO_LED_G_Pin GPIO_PIN_4
+#define GPIO_LED_G_GPIO_Port GPIOA
+#define GPIO_LED_R_Pin GPIO_PIN_5
+#define GPIO_LED_R_GPIO_Port GPIOA
+#define GPIO_LED_B_Pin GPIO_PIN_6
+#define GPIO_LED_B_GPIO_Port GPIOA
+#define ZAS_SCL_Pin GPIO_PIN_9
+#define ZAS_SCL_GPIO_Port GPIOA
+#define ZAS_SDA_Pin GPIO_PIN_10
+#define ZAS_SDA_GPIO_Port GPIOA
+#define GPIO_BLE_TX_IND_Pin GPIO_PIN_3
+#define GPIO_BLE_TX_IND_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
