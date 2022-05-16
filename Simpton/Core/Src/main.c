@@ -115,6 +115,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  printf("Hello loop\n");
+	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -322,12 +324,22 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : GPIO_ZAS_ALRT_Pin */
+  GPIO_InitStruct.Pin = GPIO_ZAS_ALRT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIO_ZAS_ALRT_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : GPIO_BLE_TX_IND_Pin */
   GPIO_InitStruct.Pin = GPIO_BLE_TX_IND_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIO_BLE_TX_IND_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
 }
 
