@@ -63,17 +63,21 @@ static void MX_USART2_UART_Init(void);
 
 //------ button interrupt
 
+uint8_t proximity = 0;
+uint8_t touch = 0;
+
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   if (GPIO_Pin == GPIO_BU_POUT_Pin)
   {
 	  HAL_GPIO_TogglePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin);
-	  printf("Proximity...\n");
+	  proximity = 1;
   }
   else if (GPIO_Pin == GPIO_BU_TOUT_Pin)
   {
 	  HAL_GPIO_TogglePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin);
-	  printf("Touch...\n");
+	  touch = 1;
   }
 }
 
@@ -130,10 +134,24 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  printf("Hello world!\n");
+  HAL_Delay(1000);
+
   while (1)
   {
-	  printf("Hello loop\n");
-	  HAL_Delay(1000);
+	  if(proximity == 1)
+	  {
+		  proximity = 0;
+		  printf("Proximity...\n");
+	  }
+
+	  if(touch == 1)
+	  {
+		  touch = 0;
+		  printf("Touch...\n");
+	  }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
