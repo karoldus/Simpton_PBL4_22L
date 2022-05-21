@@ -61,7 +61,24 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-// printf - for debuging
+//------ button interrupt
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == GPIO_BU_POUT_Pin)
+  {
+	  HAL_GPIO_TogglePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin);
+	  printf("Proximity...\n");
+  }
+  else if (GPIO_Pin == GPIO_BU_TOUT_Pin)
+  {
+	  HAL_GPIO_TogglePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin);
+	  printf("Touch...\n");
+  }
+}
+
+
+//------ printf - for debuging
 
 int __io_putchar(int ch)
 {
@@ -313,7 +330,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : GPIO_BU_POUT_Pin GPIO_BU_TOUT_Pin */
   GPIO_InitStruct.Pin = GPIO_BU_POUT_Pin|GPIO_BU_TOUT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
@@ -338,6 +355,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIO_BLE_TX_IND_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
+
   HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
