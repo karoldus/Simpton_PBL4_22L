@@ -69,6 +69,8 @@ void Error_Handler(void);
 #define GPIO_LED_R_GPIO_Port GPIOA
 #define GPIO_LED_B_Pin GPIO_PIN_6
 #define GPIO_LED_B_GPIO_Port GPIOA
+#define GPIO_RFID_MODU_Pin GPIO_PIN_7
+#define GPIO_RFID_MODU_GPIO_Port GPIOA
 #define GPIO_ZAS_ALRT_Pin GPIO_PIN_8
 #define GPIO_ZAS_ALRT_GPIO_Port GPIOA
 #define GPIO_ZAS_ALRT_EXTI_IRQn EXTI4_15_IRQn
