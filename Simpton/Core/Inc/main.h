@@ -59,6 +59,7 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define GPIO_BU_POUT_Pin GPIO_PIN_0
 #define GPIO_BU_POUT_GPIO_Port GPIOA
+#define GPIO_BU_POUT_EXTI_IRQn EXTI0_1_IRQn
 #define GPIO_BU_TOUT_Pin GPIO_PIN_1
 #define GPIO_BU_TOUT_GPIO_Port GPIOA
 #define GPIO_LED_G_Pin GPIO_PIN_4
@@ -67,6 +68,13 @@ void Error_Handler(void);
 #define GPIO_LED_R_GPIO_Port GPIOA
 #define GPIO_LED_B_Pin GPIO_PIN_6
 #define GPIO_LED_B_GPIO_Port GPIOA
+#define GPIO_RFID_MODU_Pin GPIO_PIN_7
+#define GPIO_RFID_MODU_GPIO_Port GPIOA
+#define GPIO_RFID_DATA_Pin GPIO_PIN_0
+#define GPIO_RFID_DATA_GPIO_Port GPIOB
+#define GPIO_RFID_CLK_Pin GPIO_PIN_1
+#define GPIO_RFID_CLK_GPIO_Port GPIOB
+#define GPIO_RFID_CLK_EXTI_IRQn EXTI0_1_IRQn
 #define GPIO_ZAS_ALRT_Pin GPIO_PIN_8
 #define GPIO_ZAS_ALRT_GPIO_Port GPIOA
 #define GPIO_ZAS_ALRT_EXTI_IRQn EXTI4_15_IRQn
