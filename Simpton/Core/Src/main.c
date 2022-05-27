@@ -66,18 +66,12 @@ static void MX_USART2_UART_Init(void);
 uint8_t proximity = 0;
 uint8_t touch = 0;
 
-
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   if (GPIO_Pin == GPIO_BU_POUT_Pin)
   {
 	  HAL_GPIO_TogglePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin);
 	  proximity = 1;
-  }
-  else if (GPIO_Pin == GPIO_BU_TOUT_Pin)
-  {
-	  HAL_GPIO_TogglePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin);
-	  touch = 1;
   }
 }
 
@@ -95,23 +89,6 @@ int __io_putchar(int ch)
     return 1;
 }
 
-
-void HAL_Delay(uint32_t Delay)
-{
-  uint32_t tickstart = HAL_GetTick();
-  uint32_t wait = Delay;
-
-  /* Add a period to guaranty minimum wait */
-  if (wait < HAL_MAX_DELAY)
-  {
-    wait += (uint32_t)uwTickFreq;
-  }
-
-  while ((HAL_GetTick() - tickstart) < wait)
-  {
-	  __WFI();
-  }
-}
 
 /* USER CODE END 0 */
 
@@ -166,16 +143,6 @@ int main(void)
 		  printf("Proximity...\n");
 	  }
 
-	  if(touch == 1)
-	  {
-		  touch = 0;
-		  printf("Touch...\n");
-
-		  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, 0);
-		  HAL_Delay(100);
-		  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, 1);
-	  }
-
 	  HAL_Delay(100);
 
     /* USER CODE END WHILE */
@@ -202,10 +169,9 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
-  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
-  RCC_OscInitStruct.MSICalibrationValue = 0;
-  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_5;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -216,8 +182,8 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV4;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
@@ -252,7 +218,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x00000708;
+  hi2c1.Init.Timing = 0x00000E14;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -370,13 +336,19 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_LED_G_Pin|GPIO_LED_R_Pin|GPIO_LED_B_Pin|GPIO_RFID_MODU_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pins : GPIO_BU_POUT_Pin GPIO_BU_TOUT_Pin */
-  GPIO_InitStruct.Pin = GPIO_BU_POUT_Pin|GPIO_BU_TOUT_Pin;
+  /*Configure GPIO pin : GPIO_BU_POUT_Pin */
+  GPIO_InitStruct.Pin = GPIO_BU_POUT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIO_BU_POUT_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : GPIO_BU_TOUT_Pin */
+  GPIO_InitStruct.Pin = GPIO_BU_TOUT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIO_BU_TOUT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : GPIO_LED_G_Pin GPIO_LED_R_Pin GPIO_LED_B_Pin GPIO_RFID_MODU_Pin */
   GPIO_InitStruct.Pin = GPIO_LED_G_Pin|GPIO_LED_R_Pin|GPIO_LED_B_Pin|GPIO_RFID_MODU_Pin;
@@ -385,11 +357,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB0 PB1 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+  /*Configure GPIO pin : GPIO_RFID_DATA_Pin */
+  GPIO_InitStruct.Pin = GPIO_RFID_DATA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIO_RFID_DATA_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : GPIO_RFID_CLK_Pin */
+  GPIO_InitStruct.Pin = GPIO_RFID_CLK_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIO_RFID_CLK_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : GPIO_ZAS_ALRT_Pin */
   GPIO_InitStruct.Pin = GPIO_ZAS_ALRT_Pin;
@@ -400,7 +378,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : GPIO_BLE_TX_IND_Pin */
   GPIO_InitStruct.Pin = GPIO_BLE_TX_IND_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIO_BLE_TX_IND_GPIO_Port, &GPIO_InitStruct);
 
