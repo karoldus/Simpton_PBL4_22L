@@ -5,4 +5,31 @@
  *      Author: karol
  */
 
+#include "ble_driver.h"
 
+uint8_t BLE_Initialise( BLE *dev, UART_HandleTypeDef *uartHandle, GPIO_TypeDef *powerGPIOPort, uint16_t powerGPIOPin )
+{
+	dev->uartHandle 	= uartHandle;
+	dev->powerGPIOPort 	= powerGPIOPort;
+	dev->powerGPIOPin 	= powerGPIOPin;
+
+	dev->connection 	= 0;
+	dev->power 			= 1;
+}
+
+
+HAL_StatusTypeDef BLE_PowerOff( BLE *dev )
+{
+	RN4870_EnterCMD(dev->uartHandle);
+	RN4870_WriteCommand(dev->uartHandle, SET_DORMANT_MODE);
+	dev->power = 0;
+}
+
+
+HAL_StatusTypeDef BLE_PowerOn( BLE *dev )
+{
+	HAL_GPIO_WritePin(dev->powerGPIOPort, dev->powerGPIOPin, 0);
+	HAL_Delay(100);
+	HAL_GPIO_WritePin(dev->powerGPIOPort, dev->powerGPIOPin, 1);
+	dev->power = 1;
+}

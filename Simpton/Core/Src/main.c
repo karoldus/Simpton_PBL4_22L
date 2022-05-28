@@ -64,7 +64,6 @@ static void MX_USART2_UART_Init(void);
 //------ button interrupt
 
 uint8_t proximity = 0;
-uint8_t touch = 0;
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -133,7 +132,7 @@ int main(void)
   printf("Hello world!\n");
   HAL_Delay(1000);
 
-  HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, 0);
+  //HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, 0);
 
   while (1)
   {
