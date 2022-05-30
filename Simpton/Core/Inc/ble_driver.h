@@ -56,6 +56,7 @@ uint8_t BLE_Initialise( BLE *dev, UART_HandleTypeDef *uartHandle, GPIO_TypeDef *
 
 HAL_StatusTypeDef BLE_PowerOff( BLE *dev );
 HAL_StatusTypeDef BLE_PowerOn( BLE *dev );
+HAL_StatusTypeDef BLE_Send( BLE *dev, char *mess );
 
 
 #endif /* INC_BLE_DRIVER_H_ */
