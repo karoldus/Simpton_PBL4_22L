@@ -48,6 +48,8 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
+BLE ble_device;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,6 +128,8 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, "Simptonek" );
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -133,6 +137,14 @@ int main(void)
 
   printf("Hello world!\n");
   HAL_Delay(1000);
+
+//  HAL_Delay(10000);
+//  BLE_PowerOff( &ble_device );
+//
+//  HAL_Delay(10000);
+//  BLE_PowerOn( &ble_device );
+
+
 
   //HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, 0);
 
@@ -143,6 +155,15 @@ int main(void)
 		  proximity = 0;
 		  printf("Proximity...\n");
 	  }
+
+	  HAL_StatusTypeDef status = BLE_Send(&ble_device, "$$$");
+	  HAL_Delay(500);
+	  status = BLE_Send(&ble_device, "Hejka\n\r");
+	  HAL_Delay(500);
+	  status = BLE_Send(&ble_device, "---\r");
+	  HAL_Delay(500);
+	  status = BLE_Send(&ble_device, "Hejka2\n\r");
+	  HAL_Delay(500);
 
 	  HAL_Delay(100);
 

@@ -47,7 +47,7 @@ typedef struct {
  *  INITIALIZATION
  */
 
-uint8_t BLE_Initialise( BLE *dev, UART_HandleTypeDef *uartHandle, GPIO_TypeDef *powerGPIOPort, uint16_t powerGPIOPin );
+uint8_t BLE_Initialise( BLE *dev, UART_HandleTypeDef *uartHandle, GPIO_TypeDef *powerGPIOPort, uint16_t powerGPIOPin, char *name );
 
 
 /*
@@ -56,6 +56,12 @@ uint8_t BLE_Initialise( BLE *dev, UART_HandleTypeDef *uartHandle, GPIO_TypeDef *
 
 HAL_StatusTypeDef BLE_PowerOff( BLE *dev );
 HAL_StatusTypeDef BLE_PowerOn( BLE *dev );
+
+
+/*
+ *  TRANSMIT FUNCTIONS
+ */
+
 HAL_StatusTypeDef BLE_Send( BLE *dev, char *mess );
 
 

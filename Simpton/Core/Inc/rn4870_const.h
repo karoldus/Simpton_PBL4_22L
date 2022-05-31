@@ -43,7 +43,7 @@
 #define DEFAULT_CMD_TIMEOUT   300   // default timeout
 #define RESET_CMD_TIMEOUT     1000
 #define CRLF                  "\r\n"
-#define CR                    '\r'
+//#define CR                    '\r'
 #define LF                    '\n'
 
 // ------------------- Commands -----------------------
