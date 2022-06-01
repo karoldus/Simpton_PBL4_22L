@@ -77,6 +77,14 @@ HAL_StatusTypeDef RN4870_Write( UART_HandleTypeDef *uartHandle, const char *comm
 	return status;
 }
 
+HAL_StatusTypeDef RN4870_WriteCommand( UART_HandleTypeDef *uartHandle, const char *command )
+{
+	HAL_StatusTypeDef status = HAL_UART_Transmit(uartHandle, (uint8_t*)command, strlen(command), HAL_MAX_DELAY);
+	if(status == HAL_OK)
+		status = HAL_UART_Transmit(uartHandle, CRLF, strlen(CRLF), HAL_MAX_DELAY);
+	return status;
+}
+
 
 HAL_StatusTypeDef RN4870_SetName( UART_HandleTypeDef *uartHandle, char *name )
 {
@@ -88,7 +96,7 @@ HAL_StatusTypeDef RN4870_SetName( UART_HandleTypeDef *uartHandle, char *name )
 	strcpy(to_send, SET_SERIALIZED_NAME);
 	strcpy(to_send, name);
 
-	HAL_StatusTypeDef status = RN4870_Write(uartHandle, to_send);
+	HAL_StatusTypeDef status = RN4870_WriteCommand(uartHandle, to_send);
 
 //	if(expectResponse(PROMPT_END ,DEFAULT_CMD_TIMEOUT, uartHandle))
 //		return HAL_OK;
@@ -104,7 +112,7 @@ HAL_StatusTypeDef RN4870_Reboot( UART_HandleTypeDef *uartHandle )
 {
 	RN4870_EnterCMD(uartHandle);
 
-	HAL_StatusTypeDef status = RN4870_Write(uartHandle, REBOOT);
+	HAL_StatusTypeDef status = RN4870_WriteCommand(uartHandle, REBOOT);
 
 	HAL_Delay(DELAY_BEFORE_CMD);
 

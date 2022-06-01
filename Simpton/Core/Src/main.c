@@ -138,11 +138,13 @@ int main(void)
   printf("Hello world!\n");
   HAL_Delay(1000);
 
-//  HAL_Delay(10000);
+//  HAL_Delay(1000);
 //  BLE_PowerOff( &ble_device );
 //
-//  HAL_Delay(10000);
-//  BLE_PowerOn( &ble_device );
+//  HAL_Delay(1000);
+  //BLE_PowerOn( &ble_device );
+
+
 
 
 
@@ -156,14 +158,27 @@ int main(void)
 		  printf("Proximity...\n");
 	  }
 
-	  HAL_StatusTypeDef status = BLE_Send(&ble_device, "$$$");
+//	  HAL_StatusTypeDef status = BLE_Send(&ble_device, "$$$");
 	  HAL_Delay(500);
-	  status = BLE_Send(&ble_device, "Hejka\n\r");
+//	  status = BLE_Send(&ble_device, "so,1\r");
+//	  status = BLE_Send(&ble_device, "R,1\r");
+//	  status = BLE_Send(&ble_device, "Hejka\n\r");
+//	  HAL_Delay(500);
+//	  status = BLE_Send(&ble_device, "---\r");
 	  HAL_Delay(500);
-	  status = BLE_Send(&ble_device, "---\r");
+	  HAL_StatusTypeDef status = BLE_Send(&ble_device, "Hejka2/r"); //skasować /r
+	  //BLE_PowerOff( &ble_device );
+//	  status = BLE_Send(&ble_device, "$$$O,0\r");
+	  //działa
+	  status = BLE_Send(&ble_device, "$$$");
+	  HAL_Delay(50);
+	  status = BLE_Send(&ble_device, "O,0");
+	  status = BLE_Send(&ble_device, "\r");
 	  HAL_Delay(500);
-	  status = BLE_Send(&ble_device, "Hejka2\n\r");
-	  HAL_Delay(500);
+
+	  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, 0);
+	  HAL_Delay(10000);
+	  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, 1);
 
 	  HAL_Delay(100);
 

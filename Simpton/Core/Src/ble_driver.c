@@ -31,7 +31,8 @@ uint8_t BLE_Initialise( BLE *dev, UART_HandleTypeDef *uartHandle, GPIO_TypeDef *
 HAL_StatusTypeDef BLE_PowerOff( BLE *dev )
 {
 	RN4870_EnterCMD(dev->uartHandle);
-	RN4870_Write(dev->uartHandle, SET_DORMANT_MODE);
+	HAL_Delay(500);
+	RN4870_WriteCommand(dev->uartHandle, SET_DORMANT_MODE); // add /r
 	dev->power = 0;
 }
 
