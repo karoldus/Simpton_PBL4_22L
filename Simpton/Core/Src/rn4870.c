@@ -77,11 +77,14 @@ HAL_StatusTypeDef RN4870_Write( UART_HandleTypeDef *uartHandle, const char *comm
 	return status;
 }
 
+/*
+ *  Adds \r at the end
+ */
 HAL_StatusTypeDef RN4870_WriteCommand( UART_HandleTypeDef *uartHandle, const char *command )
 {
 	HAL_StatusTypeDef status = HAL_UART_Transmit(uartHandle, (uint8_t*)command, strlen(command), HAL_MAX_DELAY);
-	if(status == HAL_OK)
-		status = HAL_UART_Transmit(uartHandle, CRLF, strlen(CRLF), HAL_MAX_DELAY);
+	//if(status == HAL_OK)
+	status = HAL_UART_Transmit(uartHandle, DATA_LAST_CHAR, strlen(DATA_LAST_CHAR), HAL_MAX_DELAY);
 	return status;
 }
 

@@ -165,20 +165,24 @@ int main(void)
 //	  status = BLE_Send(&ble_device, "Hejka\n\r");
 //	  HAL_Delay(500);
 //	  status = BLE_Send(&ble_device, "---\r");
-	  HAL_Delay(500);
-	  HAL_StatusTypeDef status = BLE_Send(&ble_device, "Hejka2/r"); //skasować /r
+//	  HAL_Delay(500);
+	  HAL_StatusTypeDef status = BLE_Send(&ble_device, "Hejka2");
 	  //BLE_PowerOff( &ble_device );
 //	  status = BLE_Send(&ble_device, "$$$O,0\r");
 	  //działa
-	  status = BLE_Send(&ble_device, "$$$");
-	  HAL_Delay(50);
-	  status = BLE_Send(&ble_device, "O,0");
-	  status = BLE_Send(&ble_device, "\r");
-	  HAL_Delay(500);
+//	  status = BLE_Send(&ble_device, "$$$");
+//	  HAL_Delay(50);
+//	  status = BLE_Send(&ble_device, "O,0");
+//	  status = BLE_Send(&ble_device, "\r");
+//	  HAL_Delay(500);
 
-	  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, 0);
-	  HAL_Delay(10000);
-	  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, 1);
+	  BLE_PowerOff(&ble_device);
+
+	  BLE_PowerOn(&ble_device);
+
+//	  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, 0);
+//	  HAL_Delay(10000);
+//	  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, 1);
 
 	  HAL_Delay(100);
 

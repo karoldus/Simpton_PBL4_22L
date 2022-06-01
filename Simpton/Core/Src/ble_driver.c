@@ -31,16 +31,24 @@ uint8_t BLE_Initialise( BLE *dev, UART_HandleTypeDef *uartHandle, GPIO_TypeDef *
 HAL_StatusTypeDef BLE_PowerOff( BLE *dev )
 {
 	RN4870_EnterCMD(dev->uartHandle);
+	HAL_Delay(50);
+	RN4870_WriteCommand(dev->uartHandle, SET_DORMANT_MODE);
 	HAL_Delay(500);
-	RN4870_WriteCommand(dev->uartHandle, SET_DORMANT_MODE); // add /r
 	dev->power = 0;
+
+
+//	status = BLE_Send(&ble_device, "$$$");
+//		  HAL_Delay(50);
+//		  status = BLE_Send(&ble_device, "O,0");
+//		  status = BLE_Send(&ble_device, "\r");
+//		  HAL_Delay(500);
 }
 
 
 HAL_StatusTypeDef BLE_PowerOn( BLE *dev )
 {
 	HAL_GPIO_WritePin(dev->powerGPIOPort, dev->powerGPIOPin, 0);
-	HAL_Delay(100);
+	HAL_Delay(1200);
 	HAL_GPIO_WritePin(dev->powerGPIOPort, dev->powerGPIOPin, 1);
 	dev->power = 1;
 }
