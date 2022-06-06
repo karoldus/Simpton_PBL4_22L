@@ -28,5 +28,13 @@ HAL_StatusTypeDef RN4870_EnterCMD( UART_HandleTypeDef *uartHandle );
 HAL_StatusTypeDef RN4870_ExitCMD( UART_HandleTypeDef *uartHandle );
 HAL_StatusTypeDef RN4870_Write( UART_HandleTypeDef *uartHandle, const char *command );
 
+HAL_StatusTypeDef RN4870_WriteCommand( UART_HandleTypeDef *uartHandle, const char *command );
+
+HAL_StatusTypeDef RN4870_Reboot( UART_HandleTypeDef *uartHandle );
+
+void RN4870_ClearRXBuffer( UART_HandleTypeDef *uartHandle );
+
+HAL_StatusTypeDef RN4870_GetResponse( UART_HandleTypeDef *uartHandle, char *response );
+
 
 #endif /* INC_RN4870_H_ */

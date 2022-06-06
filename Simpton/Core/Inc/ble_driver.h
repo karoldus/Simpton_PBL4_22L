@@ -34,7 +34,7 @@ typedef struct {
 	GPIO_TypeDef *powerGPIOPort;
 	uint16_t powerGPIOPin;
 
-	/* Connection status */
+	/* Connection status: 0 - not connected, 1 - connected */
 	uint8_t connection;
 
 	/* Power status */
@@ -63,6 +63,13 @@ HAL_StatusTypeDef BLE_PowerOn( BLE *dev );
  */
 
 HAL_StatusTypeDef BLE_Send( BLE *dev, char *mess );
+
+
+/*
+ *  CONNECTION FUNCTIONS
+ */
+
+HAL_StatusTypeDef BLE_is_connected( BLE *dev );
 
 
 #endif /* INC_BLE_DRIVER_H_ */

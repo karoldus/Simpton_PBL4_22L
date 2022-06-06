@@ -130,6 +130,14 @@ int main(void)
 
   BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, "Simptonek" );
 
+  RN4870_Reboot(&huart2);
+
+//  BLE_PowerOff(&ble_device);
+//
+//  BLE_PowerOn(&ble_device);
+
+  //RN4870_Reboot( ble_device.uartHandle );
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -145,28 +153,37 @@ int main(void)
   //BLE_PowerOn( &ble_device );
 
 
-
+  HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_RESET);
 
 
   //HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, 0);
 
   while (1)
   {
-	  if(proximity == 1)
+	  HAL_StatusTypeDef status = BLE_is_connected(&ble_device);
+
+	  if(status == HAL_OK)
 	  {
-		  proximity = 0;
-		  printf("Proximity...\n");
+		  if(ble_device.connection == 1)
+			  HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_SET);
+		  else
+			  HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_RESET);
 	  }
 
+
+//	  if(proximity == 1)
+//	  {
+//		  proximity = 0;
+//		  printf("Proximity...\n");
+//	  }
+
 //	  HAL_StatusTypeDef status = BLE_Send(&ble_device, "$$$");
-	  HAL_Delay(500);
+	  //HAL_Delay(500);
 //	  status = BLE_Send(&ble_device, "so,1\r");
 //	  status = BLE_Send(&ble_device, "R,1\r");
 //	  status = BLE_Send(&ble_device, "Hejka\n\r");
-//	  HAL_Delay(500);
-//	  status = BLE_Send(&ble_device, "---\r");
-//	  HAL_Delay(500);
-	  HAL_StatusTypeDef status = BLE_Send(&ble_device, "Hejka2");
+	  HAL_Delay(50);
+	  BLE_Send(&ble_device, "Hejka2");
 	  //BLE_PowerOff( &ble_device );
 //	  status = BLE_Send(&ble_device, "$$$O,0\r");
 	  //działa
@@ -174,17 +191,17 @@ int main(void)
 //	  HAL_Delay(50);
 //	  status = BLE_Send(&ble_device, "O,0");
 //	  status = BLE_Send(&ble_device, "\r");
-//	  HAL_Delay(500);
+	  //HAL_Delay(50);
 
-	  BLE_PowerOff(&ble_device);
-
-	  BLE_PowerOn(&ble_device);
+	  //BLE_PowerOff(&ble_device);
+//
+	  //BLE_PowerOn(&ble_device);
 
 //	  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, 0);
 //	  HAL_Delay(10000);
 //	  HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, 1);
 
-	  HAL_Delay(100);
+	  //HAL_Delay(100);
 
     /* USER CODE END WHILE */
 
@@ -341,7 +358,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
