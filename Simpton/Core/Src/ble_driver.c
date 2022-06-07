@@ -102,29 +102,32 @@ HAL_StatusTypeDef BLE_is_connected( BLE *dev )
 //		return HAL_TIMEOUT;
 //	}
 
-	char line_buffer[LINE_MAX_LENGTH + 1] = {0};
+	uint8_t line_buffer[LINE_MAX_LENGTH + 1] = {0};
 	uint8_t line_length = 0;
 
 	unsigned long previous = HAL_GetTick();
 
-	while(HAL_GetTick() - previous < 2000) //DEFAULT_CMD_TIMEOUT
-	{
-		uint8_t value;
+//	while(HAL_GetTick() - previous < 2000) //DEFAULT_CMD_TIMEOUT
+//	{
+//		uint8_t value;
+//
+//		HAL_StatusTypeDef status = HAL_UART_Receive(dev->uartHandle, &value, 1, 100);
+//
+//		if ( status == HAL_OK)
+//		{
+//			if(line_length < LINE_MAX_LENGTH)
+//			{
+//				line_buffer[line_length++] = value;
+//			}
+//		}
+//	}
 
-		HAL_StatusTypeDef status = HAL_UART_Receive(dev->uartHandle, &value, 1, 100);
-
-		if ( status == HAL_OK)
-		{
-			if(line_length < LINE_MAX_LENGTH)
-			{
-				line_buffer[line_length++] = value;
-			}
-		}
-	}
+	while(HAL_UART_Receive(dev->uartHandle, line_buffer, 1, 1000))
+		{}
 
 	unsigned long newtime = HAL_GetTick();
 
-	if(strlen(line_buffer) == 0)
+	if(strlen((const char*)line_buffer) == 0)
 	{
 		RN4870_ExitCMD(dev->uartHandle);
 		HAL_Delay(100);

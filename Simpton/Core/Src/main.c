@@ -45,6 +45,7 @@
 
 UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE BEGIN PV */
 
@@ -56,8 +57,9 @@ BLE ble_device;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
-static void MX_LPUART1_UART_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_LPUART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -81,16 +83,16 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 //------ printf - for debuging
 
-int __io_putchar(int ch)
-{
-    if (ch == '\n') {
-        uint8_t ch2 = '\r';
-        HAL_UART_Transmit(&hlpuart1, &ch2, 1, HAL_MAX_DELAY);
-    }
-
-    HAL_UART_Transmit(&hlpuart1, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
-    return 1;
-}
+//int __io_putchar(int ch)
+//{
+//    if (ch == '\n') {
+//        uint8_t ch2 = '\r';
+//        HAL_UART_Transmit(&hlpuart1, &ch2, 1, HAL_MAX_DELAY);
+//    }
+//
+//    HAL_UART_Transmit(&hlpuart1, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
+//    return 1;
+//}
 
 
 /* USER CODE END 0 */
@@ -124,13 +126,14 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
-  MX_LPUART1_UART_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
+  MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, "Simptonek" );
+//  BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, "Simptonek" );
 
-  RN4870_Reboot(&huart2);
+//  RN4870_Reboot(&huart2);
 
 //  BLE_PowerOff(&ble_device);
 //
@@ -157,18 +160,38 @@ int main(void)
 
 
   //HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, 0);
-
+  uint8_t value[100];
+  memset(value, 0, sizeof(value));
   while (1)
   {
-	  HAL_StatusTypeDef status = BLE_is_connected(&ble_device);
 
-	  if(status == HAL_OK)
-	  {
-		  if(ble_device.connection == 1)
-			  HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_SET);
-		  else
-			  HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_RESET);
-	  }
+	  HAL_StatusTypeDef state=0;
+	  state = HAL_UART_Receive(&huart2, value, 1, 10000);
+
+	  //state = HAL_UART_Receive_IT(&huart2, value, 6);
+ 	  if( state == HAL_OK)
+ 	  {
+ 		  printf("Ok");
+ 	  }
+ 	  else if (state != HAL_TIMEOUT)
+ 	  {
+ 		 printf("Error");
+ 	  }
+
+	  HAL_Delay(200);
+	  BLE_Send(&ble_device, "a");
+
+
+
+//	  HAL_StatusTypeDef status = BLE_is_connected(&ble_device);
+
+//	  if(status == HAL_OK)
+//	  {
+//		  if(ble_device.connection == 1)
+//			  HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_SET);
+//		  else
+//			  HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_RESET);
+//	  }
 
 
 //	  if(proximity == 1)
@@ -182,8 +205,8 @@ int main(void)
 //	  status = BLE_Send(&ble_device, "so,1\r");
 //	  status = BLE_Send(&ble_device, "R,1\r");
 //	  status = BLE_Send(&ble_device, "Hejka\n\r");
-	  HAL_Delay(50);
-	  BLE_Send(&ble_device, "Hejka2");
+//	  HAL_Delay(50);
+//	  BLE_Send(&ble_device, "Hejka2");
 	  //BLE_PowerOff( &ble_device );
 //	  status = BLE_Send(&ble_device, "$$$O,0\r");
 	  //działa
@@ -324,8 +347,8 @@ static void MX_LPUART1_UART_Init(void)
 
   /* USER CODE END LPUART1_Init 1 */
   hlpuart1.Instance = LPUART1;
-  hlpuart1.Init.BaudRate = 115200;
-  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
+  hlpuart1.Init.BaudRate = 209700;
+  hlpuart1.Init.WordLength = UART_WORDLENGTH_7B;
   hlpuart1.Init.StopBits = UART_STOPBITS_1;
   hlpuart1.Init.Parity = UART_PARITY_NONE;
   hlpuart1.Init.Mode = UART_MODE_TX_RX;
@@ -374,6 +397,22 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel4_5_6_7_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel4_5_6_7_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel4_5_6_7_IRQn);
 
 }
 
