@@ -137,7 +137,7 @@ HAL_StatusTypeDef RN4870_Reboot( UART_HandleTypeDef *uartHandle )
 void RN4870_ClearRXBuffer( UART_HandleTypeDef *uartHandle )
 {
 	uint8_t value;
-	while(HAL_UART_Receive(uartHandle, &value, 1, 0) == HAL_OK) {}
+	while(HAL_UART_Receive(uartHandle, &value, 1, 0) == HAL_OK) {HAL_UART_Abort(uartHandle);}
 }
 
 /*

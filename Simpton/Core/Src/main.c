@@ -131,7 +131,7 @@ int main(void)
   MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-//  BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, "Simptonek" );
+  BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, "Simptonek" );
 
 //  RN4870_Reboot(&huart2);
 
@@ -166,8 +166,18 @@ int main(void)
   {
 
 	  HAL_StatusTypeDef state=0;
-	  state = HAL_UART_Receive(&huart2, value, 1, 1000);
+
+	  RN4870_EnterCMD(ble_device.uartHandle);
+	  HAL_Delay(50);
+
+
+	  //RN4870_ClearRXBuffer(ble_device.uartHandle); <- nie działa !!!
 	  HAL_UART_Abort(&huart2);
+	  	//RN4870_WriteCommand(dev->uartHandle, GET_CONNECTION_STATUS);
+	  RN4870_Write(ble_device.uartHandle, "GK\r");
+	  state = HAL_UART_Receive(&huart2, value, 4, 1000);
+	  HAL_UART_Abort(&huart2);
+
 
 	  //state = HAL_UART_Receive_IT(&huart2, value, 6);
  	  if( state == HAL_OK)
@@ -178,6 +188,8 @@ int main(void)
  	  {
  		 printf("Error");
  	  }
+
+ 	 RN4870_ExitCMD(ble_device.uartHandle);
 
 
 	  HAL_Delay(200);
@@ -386,7 +398,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 9600;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
