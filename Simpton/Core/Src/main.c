@@ -165,31 +165,30 @@ int main(void)
   while (1)
   {
 
-	  HAL_StatusTypeDef state=0;
-
-	  RN4870_EnterCMD(ble_device.uartHandle);
-	  HAL_Delay(50);
-
-
-	  //RN4870_ClearRXBuffer(ble_device.uartHandle); <- nie działa !!!
-	  HAL_UART_Abort(&huart2);
-	  	//RN4870_WriteCommand(dev->uartHandle, GET_CONNECTION_STATUS);
-	  RN4870_Write(ble_device.uartHandle, "GK\r");
-	  state = HAL_UART_Receive(&huart2, value, 4, 1000);
-	  HAL_UART_Abort(&huart2);
-
-
-	  //state = HAL_UART_Receive_IT(&huart2, value, 6);
- 	  if( state == HAL_OK)
- 	  {
- 		  printf("Ok"); //HAL_UART_StateTypeDef
- 	  }
- 	  else
- 	  {
- 		 printf("Error");
- 	  }
-
- 	 RN4870_ExitCMD(ble_device.uartHandle);
+//	  HAL_StatusTypeDef state=0;
+//
+//	  RN4870_EnterCMD(ble_device.uartHandle);
+//	  HAL_Delay(50);
+//
+//
+//	  RN4870_ClearRXBuffer(ble_device.uartHandle);
+//	  HAL_UART_Abort(&huart2);
+//	  RN4870_WriteCommand(ble_device.uartHandle, GET_CONNECTION_STATUS);
+//	  state = HAL_UART_Receive(&huart2, value, 4, 1000);
+//	  HAL_UART_Abort(&huart2);
+//
+//
+//	  //state = HAL_UART_Receive_IT(&huart2, value, 6);
+// 	  if( state == HAL_OK)
+// 	  {
+// 		  printf("Ok"); //HAL_UART_StateTypeDef
+// 	  }
+// 	  else
+// 	  {
+// 		 printf("Error");
+// 	  }
+//
+// 	 RN4870_ExitCMD(ble_device.uartHandle);
 
 
 	  HAL_Delay(200);
@@ -197,7 +196,7 @@ int main(void)
 
 
 
-//	  HAL_StatusTypeDef status = BLE_is_connected(&ble_device);
+	  HAL_StatusTypeDef status = BLE_is_connected(&ble_device);
 
 //	  if(status == HAL_OK)
 //	  {

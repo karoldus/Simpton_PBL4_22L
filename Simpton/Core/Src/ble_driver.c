@@ -72,17 +72,43 @@ HAL_StatusTypeDef BLE_Send( BLE *dev, char *mess )
 HAL_StatusTypeDef BLE_is_connected( BLE *dev )
 {
 	RN4870_EnterCMD(dev->uartHandle);
-	HAL_Delay(50);
+	HAL_Delay(100);
 
+	uint8_t response[LINE_MAX_LENGTH + 1] = {0};
 
 	RN4870_ClearRXBuffer(dev->uartHandle);
+	HAL_UART_Abort(dev->uartHandle);
 	//RN4870_WriteCommand(dev->uartHandle, GET_CONNECTION_STATUS);
-	RN4870_Write(dev->uartHandle, "GK\r");
-	HAL_Delay(50);
+	RN4870_WriteCommand(dev->uartHandle, GET_CONNECTION_STATUS);
+	HAL_StatusTypeDef state = HAL_UART_Receive(dev->uartHandle, response, 4, 1000);
+	HAL_UART_Abort(dev->uartHandle);
 //	RN4870_WriteCommand(dev->uartHandle, GET_CONNECTION_STATUS);
 //	HAL_Delay(50);
 
-	char response[LINE_MAX_LENGTH + 1] = {0};
+
+	if( state == HAL_OK)
+	{
+		if(strstr(response, NONE_RESP) != NULL || strstr(response, ERR_RESP) != NULL)
+		{
+			// "none" response
+			dev->connection = 0;
+		}
+		else
+		{
+			dev->connection = 1;
+		}
+		RN4870_ExitCMD(dev->uartHandle);
+		return HAL_OK;
+		//printf("Ok"); //HAL_UART_StateTypeDef
+	}
+	else // sth went wrong
+	{
+		//printf("Error");
+		dev->connection = 0;
+		RN4870_ExitCMD(dev->uartHandle);
+		return HAL_TIMEOUT;
+	}
+
 
 //	if (RN4870_GetResponse( dev->uartHandle, response ) == HAL_OK)
 //	{
@@ -102,10 +128,10 @@ HAL_StatusTypeDef BLE_is_connected( BLE *dev )
 //		return HAL_TIMEOUT;
 //	}
 
-	uint8_t line_buffer[LINE_MAX_LENGTH + 1] = {0};
-	uint8_t line_length = 0;
-
-	unsigned long previous = HAL_GetTick();
+//	uint8_t line_buffer[LINE_MAX_LENGTH + 1] = {0};
+//	uint8_t line_length = 0;
+//
+//	unsigned long previous = HAL_GetTick();
 
 //	while(HAL_GetTick() - previous < 2000) //DEFAULT_CMD_TIMEOUT
 //	{
@@ -122,26 +148,26 @@ HAL_StatusTypeDef BLE_is_connected( BLE *dev )
 //		}
 //	}
 
-	while(HAL_UART_Receive(dev->uartHandle, line_buffer, 1, 1000))
-		{}
-
-	unsigned long newtime = HAL_GetTick();
-
-	if(strlen((const char*)line_buffer) == 0)
-	{
-		RN4870_ExitCMD(dev->uartHandle);
-		HAL_Delay(100);
-		return HAL_TIMEOUT;
-	}
-	else
-	{
-		if(strstr(response, NONE_RESP) != NULL)
-			dev->connection = 0;
-		else
-			dev->connection = 1;
-
-		RN4870_ExitCMD(dev->uartHandle);
-		HAL_Delay(100);
-		return HAL_OK;
-	}
+//	while(HAL_UART_Receive(dev->uartHandle, line_buffer, 1, 1000))
+//		{}
+//
+//	unsigned long newtime = HAL_GetTick();
+//
+//	if(strlen((const char*)line_buffer) == 0)
+//	{
+//		RN4870_ExitCMD(dev->uartHandle);
+//		HAL_Delay(100);
+//		return HAL_TIMEOUT;
+//	}
+//	else
+//	{
+//		if(strstr(response, NONE_RESP) != NULL)
+//			dev->connection = 0;
+//		else
+//			dev->connection = 1;
+//
+//		RN4870_ExitCMD(dev->uartHandle);
+//		HAL_Delay(100);
+//		return HAL_OK;
+//	}
 }
