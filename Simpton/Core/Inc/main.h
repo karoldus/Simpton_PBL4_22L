@@ -42,10 +42,29 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 
+#define RFID_TIMEOUT	10000 // 10 s
+#define BLE_TIMEOUT		10000 // 10 s
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
+
+enum ProgramState {
+	SLEEP_STATE,
+	WAKING_UP_STATE,
+	WAITING_FOR_RFID_STATE,
+	RFID_FOUND_STATE,
+	RFID_TIMEOUT_STATE,
+	//PREPARE_TO_SLEEP_STATE
+};
+
+struct StateMachine {
+	enum ProgramState programState;
+	uint32_t RFIDStartTime;
+	uint32_t BLEStartTime;
+};
+
 
 /* USER CODE END EM */
 
@@ -53,6 +72,15 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+
+void waking_up();
+void rfid_found();
+void rfid_not_found();
+void ble_found();
+void ble_not_found();
+void prepare_to_sleep();
+
+
 
 /* USER CODE END EFP */
 
@@ -62,12 +90,12 @@ void Error_Handler(void);
 #define GPIO_BU_POUT_EXTI_IRQn EXTI0_1_IRQn
 #define GPIO_BU_TOUT_Pin GPIO_PIN_1
 #define GPIO_BU_TOUT_GPIO_Port GPIOA
-#define GPIO_LED_G_Pin GPIO_PIN_4
-#define GPIO_LED_G_GPIO_Port GPIOA
+#define GPIO_LED_B_Pin GPIO_PIN_4
+#define GPIO_LED_B_GPIO_Port GPIOA
 #define GPIO_LED_R_Pin GPIO_PIN_5
 #define GPIO_LED_R_GPIO_Port GPIOA
-#define GPIO_LED_B_Pin GPIO_PIN_6
-#define GPIO_LED_B_GPIO_Port GPIOA
+#define GPIO_LED_G_Pin GPIO_PIN_6
+#define GPIO_LED_G_GPIO_Port GPIOA
 #define GPIO_RFID_MODU_Pin GPIO_PIN_7
 #define GPIO_RFID_MODU_GPIO_Port GPIOA
 #define GPIO_RFID_DATA_Pin GPIO_PIN_0
@@ -75,13 +103,6 @@ void Error_Handler(void);
 #define GPIO_RFID_CLK_Pin GPIO_PIN_1
 #define GPIO_RFID_CLK_GPIO_Port GPIOB
 #define GPIO_RFID_CLK_EXTI_IRQn EXTI0_1_IRQn
-#define GPIO_ZAS_ALRT_Pin GPIO_PIN_8
-#define GPIO_ZAS_ALRT_GPIO_Port GPIOA
-#define GPIO_ZAS_ALRT_EXTI_IRQn EXTI4_15_IRQn
-#define ZAS_SCL_Pin GPIO_PIN_9
-#define ZAS_SCL_GPIO_Port GPIOA
-#define ZAS_SDA_Pin GPIO_PIN_10
-#define ZAS_SDA_GPIO_Port GPIOA
 #define GPIO_BLE_TX_IND_Pin GPIO_PIN_3
 #define GPIO_BLE_TX_IND_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
