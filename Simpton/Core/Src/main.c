@@ -138,7 +138,7 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, "Simptonek" );
+  BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -307,7 +307,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_LED_B_Pin|GPIO_LED_R_Pin|GPIO_LED_G_Pin|GPIO_RFID_MODU_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_LED_B_Pin|GPIO_LED_R_Pin|GPIO_LED_G_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin, GPIO_PIN_SET);
@@ -362,12 +365,14 @@ void waking_up()
 {
 	//BLE_PowerOn(&ble_device);
 
+
 	HAL_GPIO_WritePin(GPIO_LED_B_GPIO_Port, GPIO_LED_B_Pin, GPIO_PIN_SET);
 	HAL_Delay(300);
 	// do sth
 	HAL_GPIO_WritePin(GPIO_LED_B_GPIO_Port, GPIO_LED_B_Pin, GPIO_PIN_RESET);
 	// do sth
 
+	//HAL_Delay(2000);
 
 	// go to next state
 	stateMachine.RFIDStartTime = HAL_GetTick();
@@ -405,6 +410,7 @@ void rfid_not_found()
 
 void ble_found()
 {
+	BLE_Send(&ble_device, "ABCD\r\n");
 
 	// blink green led x2
 	HAL_GPIO_WritePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_PIN_SET);
