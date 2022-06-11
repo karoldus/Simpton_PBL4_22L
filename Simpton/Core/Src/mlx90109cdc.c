@@ -80,10 +80,10 @@ void Read_RFID(RFID_Data *reader, TIM_HandleTypeDef* htim2)
 			}
 		}
 	}
-	else
-	{
-		printf("ERROR while reading pin state (NOT 0 or 1)\r\n");
-	}
+//	else
+//	{
+//		printf("ERROR while reading pin state (NOT 0 or 1)\r\n");
+//	}
 
 }
 uint64_t AnalyzeBuff(RFID_Data *reader)
@@ -129,13 +129,13 @@ uint64_t AnalyzeBuff(RFID_Data *reader)
 					{
 						tagid = tagid + pow(2,k);
 					}
-					else
-					{
-						printf("ERROR Wrong Data!!!\r\n");
-					}
+//					else
+//					{
+//						printf("ERROR Wrong Data!!!\r\n");
+//					}
 				}
 
-				return data;
+				return tagid;
 
 
 
