@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 
 #include "ble_driver.h"
+#include "mlx90109cdc.h"
 
 /* USER CODE END Includes */
 
@@ -41,7 +42,9 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- UART_HandleTypeDef huart2;
+ TIM_HandleTypeDef htim21;
+
+UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE BEGIN PV */
@@ -50,6 +53,8 @@ struct StateMachine stateMachine;
 
 BLE ble_device;
 
+RFID_Data reader;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,6 +62,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_TIM21_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -71,9 +77,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   {
 	  // button interrupt
 
-	  SystemClock_Config ();
-	  HAL_ResumeTick();
-	  HAL_PWR_DisableSleepOnExit();
+	  // SLEEP COMMENT IMPORTANT KAROL
+//	  SystemClock_Config ();
+//	  HAL_ResumeTick();
+//	  HAL_PWR_DisableSleepOnExit();
 
 	  // WAKE UP
 
@@ -81,8 +88,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   }
   else if (GPIO_Pin == GPIO_RFID_CLK_Pin && stateMachine.programState == WAITING_FOR_RFID_STATE)
   {
+	  if(HAL_GetTick() - stateMachine.RFIDStartTime >= RFID_TIMEOUT)
+		  HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, 1);
 	  // RFID CLK interrupt
 	  // read rfid
+	  Read_RFID(&reader,&htim21);
   }
 }
 
@@ -123,6 +133,7 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -136,9 +147,14 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART2_UART_Init();
+  MX_TIM21_Init();
+
   /* USER CODE BEGIN 2 */
 
+  Init_RFID(&reader, GPIO_RFID_DATA_GPIO_Port, GPIO_RFID_CLK_GPIO_Port, GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_DATA_Pin, GPIO_RFID_CLK_Pin, GPIO_RFID_MODU_Pin);
+  HAL_TIM_Base_Start(&htim21);
   BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -156,10 +172,11 @@ int main(void)
 	  		  break;
 
 	  	  case WAITING_FOR_RFID_STATE:
-	  		  if(1) // got tag - condition to do
+	  		  if(reader.tag != 0) // got tag - condition to do
 			  {
-	  			HAL_Delay(500); // tests
+	  			//HAL_Delay(500); // tests
 	  			  rfid_found();
+	  			  BLE_Send(&ble_device, "OK\n\r");
 
 			  }
 			  else if(HAL_GetTick() - stateMachine.RFIDStartTime >= RFID_TIMEOUT)
@@ -173,10 +190,10 @@ int main(void)
 	  	  case RFID_FOUND_STATE:
 	  		  if(BLE_is_connected(&ble_device) == HAL_OK && ble_device.connection == 1) // got connection - condition to do
 			  {
-	  			HAL_Delay(500); // tests
+	  			//HAL_Delay(500); // tests
 	  			ble_found();
 			  }
-			  else if(HAL_GetTick() - stateMachine.RFIDStartTime >= RFID_TIMEOUT)
+			  else if(HAL_GetTick() - stateMachine.RFIDStartTime >= BLE_TIMEOUT)
 			  {
 				  // BLE Timeout
 				  ble_not_found();
@@ -240,6 +257,51 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief TIM21 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM21_Init(void)
+{
+
+  /* USER CODE BEGIN TIM21_Init 0 */
+
+  /* USER CODE END TIM21_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM21_Init 1 */
+
+  /* USER CODE END TIM21_Init 1 */
+  htim21.Instance = TIM21;
+  htim21.Init.Prescaler = 0;
+  htim21.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim21.Init.Period = 65535;
+  htim21.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim21.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim21) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim21, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim21, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM21_Init 2 */
+
+  /* USER CODE END TIM21_Init 2 */
+
 }
 
 /**
@@ -379,6 +441,8 @@ void waking_up()
 	stateMachine.programState = WAITING_FOR_RFID_STATE;
 
 	// turn on RFID
+	reader.tag = 0;
+	HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, 0);
 }
 
 void rfid_found()
@@ -410,7 +474,9 @@ void rfid_not_found()
 
 void ble_found()
 {
-	BLE_Send(&ble_device, "ABCD\r\n");
+	//char to_send[20] = {'\0'};
+	//sprintf(to_send, "%d\r\n", reader.tag);
+	//BLE_Send(&ble_device, to_send);
 
 	// blink green led x2
 	HAL_GPIO_WritePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_PIN_SET);
@@ -451,9 +517,10 @@ void prepare_to_sleep()
 
 	stateMachine.programState = SLEEP_STATE;
 
-	HAL_PWR_EnableSleepOnExit();
-	HAL_SuspendTick();
-	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+	// SLEEP COMMENT IMPORTANT KAROL
+//	HAL_PWR_EnableSleepOnExit();
+//	HAL_SuspendTick();
+//	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 
 	// sleep
 }
