@@ -76,9 +76,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	  // button interrupt
 
 	  // SLEEP COMMENT IMPORTANT KAROL
-//	  SystemClock_Config ();
-//	  HAL_ResumeTick();
-//	  HAL_PWR_DisableSleepOnExit();
+	  SystemClock_Config ();
+	  HAL_ResumeTick();
+	  HAL_PWR_DisableSleepOnExit();
 
 	  // WAKE UP
 
@@ -184,9 +184,10 @@ int main(void)
 	  		  break;
 
 	  	  case RFID_FOUND_STATE:
-	  		  if(BLE_is_connected(&ble_device) == HAL_OK && ble_device.connection == 1) // got connection - condition to do
+	  		  //if(BLE_is_connected(&ble_device) == HAL_OK && ble_device.connection == 1) // got connection - condition to do
+	  		  if(1) // FAKE BLE TEST
 			  {
-	  			//HAL_Delay(500); // tests
+	  			HAL_Delay(500); // tests
 	  			ble_found();
 			  }
 			  else if(HAL_GetTick() - stateMachine.RFIDStartTime >= BLE_TIMEOUT)
@@ -454,9 +455,20 @@ void rfid_not_found()
 
 void ble_found()
 {
-	//char to_send[20] = {'\0'};
-	//sprintf(to_send, "%d\r\n", reader.tag);
-	//BLE_Send(&ble_device, to_send);
+	HAL_Delay(1000);
+	char to_send[20] = {'\0'};
+	sprintf(to_send, "%x", (reader.tag >> 32));
+	BLE_Send(&ble_device, to_send);
+	//HAL_UART_Abort(ble_device.uartHandle);
+	//HAL_Delay(1000);
+
+
+	char to_send2[20] = {'\0'};
+	uint64_t v1 = reader.tag / (1<<32);
+	v1 = (v1 << 32);
+	uint32_t v2 = reader.tag - v1;
+	sprintf(to_send2, "%x\r\n", (v2));
+	BLE_Send(&ble_device, to_send2);
 
 	// blink green led x2
 	HAL_GPIO_WritePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_PIN_SET);
@@ -498,9 +510,9 @@ void prepare_to_sleep()
 	stateMachine.programState = SLEEP_STATE;
 
 	// SLEEP COMMENT IMPORTANT KAROL
-//	HAL_PWR_EnableSleepOnExit();
-//	HAL_SuspendTick();
-//	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+	HAL_PWR_EnableSleepOnExit();
+	HAL_SuspendTick();
+	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 
 	// sleep
 }

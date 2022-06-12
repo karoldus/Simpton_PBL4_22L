@@ -42,7 +42,7 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 
-#define RFID_TIMEOUT	10000 // 10 s
+#define RFID_TIMEOUT	20000 // 10 s
 #define BLE_TIMEOUT		10000 // 10 s
 
 /* USER CODE END EC */

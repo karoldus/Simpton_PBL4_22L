@@ -32,7 +32,8 @@ typedef struct
 
 	uint64_t tag;
 
-
+	uint64_t history[5];
+	uint8_t history_len;
 
 }RFID_Data;
 

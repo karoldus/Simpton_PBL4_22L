@@ -23,6 +23,11 @@ void Init_RFID(RFID_Data *reader, GPIO_TypeDef *rfid_data_port, GPIO_TypeDef *rf
 	reader->goodClkCounter=0;
 	reader->firstBitFrameIndex=0;
 	//HAL_GPIO_TogglePin(rfid_modu_port, rfid_modu_pin);
+	for(int i=0;i<8;i++)
+	{
+		reader->history[i]=0;
+	}
+	reader->history_len = 0;
 }
 
 void Read_RFID(RFID_Data *reader, TIM_HandleTypeDef* htim2)
@@ -62,8 +67,43 @@ void Read_RFID(RFID_Data *reader, TIM_HandleTypeDef* htim2)
 			if(a != 0)
 			{
 				// turn off RFID
-				HAL_GPIO_WritePin(reader->rfid_modu_port, reader->rfid_modu_pin, 1);
-				reader->tag = a;
+				if(reader->history_len <5)
+				{
+					reader->history[reader->history_len] = a;
+					reader->history_len++;
+				}
+
+				if(reader->history_len == 5)
+				{
+					HAL_GPIO_WritePin(reader->rfid_modu_port, reader->rfid_modu_pin, 1);
+
+					for(uint64_t i = 0; i < RFID_BUFFER_SIZE; i++)
+					{
+						uint8_t val = 0;
+
+						for(uint64_t j=0; j<reader->history_len; j++)
+						{
+							val += ((reader->history[j] >> i) & 1);
+						}
+
+						if(val > 2)
+						{
+							uint64_t temp = 1;
+							temp = (temp << i);
+							reader->tag += temp;
+						}
+
+					}
+
+					reader->history_len = 0;
+
+					for(int i=0;i<5;i++)
+					{
+						reader->history[i]=0;
+					}
+
+
+				}
 			}
 
 			reader->goodClkCounter=0;
