@@ -41,31 +41,10 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
-#define RFID_TIMEOUT	20000 // 10 s
-#define BLE_TIMEOUT		10000 // 10 s
-
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
-enum ProgramState {
-	SLEEP_STATE,
-	WAKING_UP_STATE,
-	WAITING_FOR_RFID_STATE,
-	RFID_FOUND_STATE,
-	RFID_TIMEOUT_STATE,
-	//PREPARE_TO_SLEEP_STATE
-};
-
-struct StateMachine {
-	enum ProgramState programState;
-	uint32_t RFIDStartTime;
-	uint32_t BLEStartTime;
-};
-
-
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

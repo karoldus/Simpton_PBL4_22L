@@ -22,9 +22,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "state_machine.h"
+
 #include "ble_driver.h"
 #include "mlx90109cdc.h"
-//#include "gauge_driver.h"
+#include "gauge_driver.h"
 
 /* USER CODE END Includes */
 
@@ -51,15 +53,15 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
-struct StateMachine stateMachine;
+StateMachine stateMachine;
 
 BLE ble_device;
 
 RFID_Data reader;
 
-//MAX17201 gauge;
-//
-//uint8_t gaugeDataReady; //for external interrupt
+GAUGE gauge;
+
+uint8_t gaugeDataReady; //for external interrupt
 
 /* USER CODE END PV */
 
@@ -83,7 +85,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   {
 	  // button interrupt
 
-	  // SLEEP COMMENT IMPORTANT KAROL
 	  SystemClock_Config ();
 	  HAL_ResumeTick();
 	  HAL_PWR_DisableSleepOnExit();
@@ -93,32 +94,18 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	  stateMachine.programState = WAKING_UP_STATE;
   }
   else if (GPIO_Pin == GPIO_RFID_CLK_Pin && stateMachine.programState == WAITING_FOR_RFID_STATE)
-  {
+  {	// RFID CLK interrupt
 	  if(HAL_GetTick() - stateMachine.RFIDStartTime >= RFID_TIMEOUT)
 		  HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, 1);
-	  // RFID CLK interrupt
+
 	  // read rfid
 	  Read_RFID(&reader,&htim21);
   }
-//  else if ( GPIO_Pin == GPIO_ZAS_ALRT_Pin ){
-//
-//		gaugeDataReady = 1;
-//	}
+  else if ( GPIO_Pin == GPIO_ZAS_ALERT_Pin )
+  {   // gauge interrupt
+		gaugeDataReady = 1;
+  }
 }
-
-
-//------ printf - for debuging
-
-//int __io_putchar(int ch)
-//{
-//    if (ch == '\n') {
-//        uint8_t ch2 = '\r';
-//        HAL_UART_Transmit(&hlpuart1, &ch2, 1, HAL_MAX_DELAY);
-//    }
-//
-//    HAL_UART_Transmit(&hlpuart1, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
-//    return 1;
-//}
 
 
 
@@ -160,11 +147,13 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
+  Machine_Initialise(&stateMachine, &ble_device, &reader, GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_LED_B_GPIO_Port, GPIO_LED_B_Pin, GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin);
+
   Init_RFID(&reader, GPIO_RFID_DATA_GPIO_Port, GPIO_RFID_CLK_GPIO_Port, GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_DATA_Pin, GPIO_RFID_CLK_Pin, GPIO_RFID_MODU_Pin);
   HAL_TIM_Base_Start(&htim21);
   BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin);
 
-  //MAX17201_Initialise(&gauge, &hi2c1);
+  Gauge_initialise(&gauge, &hi2c1);
 
   /* USER CODE END 2 */
 
@@ -179,21 +168,21 @@ int main(void)
 	  switch(stateMachine.programState)
 	  {
 	  	  case WAKING_UP_STATE:
-	  		  waking_up();
+	  		  waking_up(&stateMachine);
 	  		  break;
 
 	  	  case WAITING_FOR_RFID_STATE:
 	  		  if(reader.tag != 0) // got tag - condition to do
 			  {
 	  			//HAL_Delay(500); // tests
-	  			  rfid_found();
+	  			  rfid_found(&stateMachine);
 	  			  BLE_Send(&ble_device, "OK\n\r");
 
 			  }
 			  else if(HAL_GetTick() - stateMachine.RFIDStartTime >= RFID_TIMEOUT)
 			  {
 				  // RFID Timeout
-				  rfid_not_found();
+				  rfid_not_found(&stateMachine);
 			  }
 
 	  		  break;
@@ -203,12 +192,12 @@ int main(void)
 	  		  if(1) // FAKE BLE TEST
 			  {
 	  			HAL_Delay(500); // tests
-	  			ble_found();
+	  			ble_found(&stateMachine);
 			  }
 			  else if(HAL_GetTick() - stateMachine.RFIDStartTime >= BLE_TIMEOUT)
 			  {
 				  // BLE Timeout
-				  ble_not_found();
+				  ble_not_found(&stateMachine);
 			  }
 
 	  		  break;
@@ -473,120 +462,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-void waking_up()
-{
-	//BLE_PowerOn(&ble_device);
-
-
-	HAL_GPIO_WritePin(GPIO_LED_B_GPIO_Port, GPIO_LED_B_Pin, GPIO_PIN_SET);
-	HAL_Delay(300);
-	// do sth
-	HAL_GPIO_WritePin(GPIO_LED_B_GPIO_Port, GPIO_LED_B_Pin, GPIO_PIN_RESET);
-	// do sth
-
-	//HAL_Delay(2000);
-
-	// go to next state
-	stateMachine.RFIDStartTime = HAL_GetTick();
-	stateMachine.programState = WAITING_FOR_RFID_STATE;
-
-	// turn on RFID
-	reader.tag = 0;
-	HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, 0);
-}
-
-void rfid_found()
-{
-	HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, GPIO_PIN_SET);
-
-	HAL_GPIO_WritePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_PIN_SET);
-	HAL_Delay(200);
-	HAL_GPIO_WritePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_PIN_RESET);
-
-	stateMachine.BLEStartTime = HAL_GetTick();
-	stateMachine.programState = RFID_FOUND_STATE;
-}
-
-
-void rfid_not_found()
-{
-	HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, 1);
-
-	HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_SET);
-	HAL_Delay(200);
-	HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_RESET);
-
-	stateMachine.BLEStartTime = HAL_GetTick();
-	stateMachine.programState = RFID_TIMEOUT_STATE;
-
-	prepare_to_sleep();
-}
-
-void ble_found()
-{
-	HAL_Delay(1000);
-	char to_send[20] = {'\0'};
-	sprintf(to_send, "%x", (reader.tag >> 32));
-	BLE_Send(&ble_device, to_send);
-	//HAL_UART_Abort(ble_device.uartHandle);
-	//HAL_Delay(1000);
-
-
-	char to_send2[20] = {'\0'};
-	uint64_t v1 = reader.tag / (1<<32);
-	v1 = (v1 << 32);
-	uint32_t v2 = reader.tag - v1;
-	sprintf(to_send2, "%x\r\n", (v2));
-	BLE_Send(&ble_device, to_send2);
-
-	// blink green led x2
-	HAL_GPIO_WritePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_PIN_SET);
-	HAL_Delay(200);
-	HAL_GPIO_WritePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_PIN_RESET);
-	HAL_Delay(200);
-	HAL_GPIO_WritePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_PIN_SET);
-	HAL_Delay(200);
-	HAL_GPIO_WritePin(GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_PIN_RESET);
-
-	// send tag to BLE
-
-
-	// check battery level and send it to BLE
-
-	prepare_to_sleep();
-}
-
-void ble_not_found()
-{
-	HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_SET);
-	HAL_Delay(200);
-	HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_RESET);
-	HAL_Delay(200);
-	HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_SET);
-	HAL_Delay(200);
-	HAL_GPIO_WritePin(GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_PIN_RESET);
-
-
-	prepare_to_sleep();
-}
-
-void prepare_to_sleep()
-{
-	//stateMachine.programState = PREPARE_TO_SLEEP_STATE;
-
-	//BLE_PowerOff(&ble_device);
-
-	stateMachine.programState = SLEEP_STATE;
-
-	// SLEEP COMMENT IMPORTANT KAROL
-	HAL_PWR_EnableSleepOnExit();
-	HAL_SuspendTick();
-	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-
-	// sleep
-}
-
 /* USER CODE END 4 */
 
 /**
