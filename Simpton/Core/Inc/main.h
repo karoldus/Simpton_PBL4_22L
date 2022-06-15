@@ -103,6 +103,8 @@ void prepare_to_sleep();
 #define GPIO_RFID_CLK_Pin GPIO_PIN_1
 #define GPIO_RFID_CLK_GPIO_Port GPIOB
 #define GPIO_RFID_CLK_EXTI_IRQn EXTI0_1_IRQn
+#define GPIO_ZAS_ALERT_Pin GPIO_PIN_8
+#define GPIO_ZAS_ALERT_GPIO_Port GPIOA
 #define GPIO_BLE_TX_IND_Pin GPIO_PIN_3
 #define GPIO_BLE_TX_IND_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

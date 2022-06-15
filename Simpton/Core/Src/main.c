@@ -24,6 +24,7 @@
 
 #include "ble_driver.h"
 #include "mlx90109cdc.h"
+//#include "gauge_driver.h"
 
 /* USER CODE END Includes */
 
@@ -42,7 +43,9 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- TIM_HandleTypeDef htim21;
+ I2C_HandleTypeDef hi2c1;
+
+TIM_HandleTypeDef htim21;
 
 UART_HandleTypeDef huart2;
 
@@ -54,6 +57,10 @@ BLE ble_device;
 
 RFID_Data reader;
 
+//MAX17201 gauge;
+//
+//uint8_t gaugeDataReady; //for external interrupt
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,6 +68,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM21_Init(void);
+static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -92,6 +100,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	  // read rfid
 	  Read_RFID(&reader,&htim21);
   }
+//  else if ( GPIO_Pin == GPIO_ZAS_ALRT_Pin ){
+//
+//		gaugeDataReady = 1;
+//	}
 }
 
 
@@ -145,11 +157,14 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_TIM21_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
   Init_RFID(&reader, GPIO_RFID_DATA_GPIO_Port, GPIO_RFID_CLK_GPIO_Port, GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_DATA_Pin, GPIO_RFID_CLK_Pin, GPIO_RFID_MODU_Pin);
   HAL_TIM_Base_Start(&htim21);
   BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin);
+
+  //MAX17201_Initialise(&gauge, &hi2c1);
 
   /* USER CODE END 2 */
 
@@ -248,12 +263,61 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_I2C1;
   PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+  PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C1_Init(void)
+{
+
+  /* USER CODE BEGIN I2C1_Init 0 */
+
+  /* USER CODE END I2C1_Init 0 */
+
+  /* USER CODE BEGIN I2C1_Init 1 */
+
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.Timing = 0x00707CBB;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Analogue filter
+  */
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Digital filter
+  */
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
+
 }
 
 /**
@@ -388,6 +452,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIO_RFID_CLK_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : GPIO_ZAS_ALERT_Pin */
+  GPIO_InitStruct.Pin = GPIO_ZAS_ALERT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIO_ZAS_ALERT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : GPIO_BLE_TX_IND_Pin */
   GPIO_InitStruct.Pin = GPIO_BLE_TX_IND_Pin;
