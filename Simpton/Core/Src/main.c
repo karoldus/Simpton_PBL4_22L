@@ -21,13 +21,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
-#include "state_machine.h"
-
-#include "ble_driver.h"
-#include "mlx90109cdc.h"
-#include "gauge_driver.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,7 +92,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		  HAL_GPIO_WritePin(GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin, 1);
 
 	  // read rfid
-	  Read_RFID(&reader,&htim21);
+	  RFID_Interrupt_handler(&reader,&htim21);
   }
   else if ( GPIO_Pin == GPIO_ZAS_ALERT_Pin )
   {   // gauge interrupt
@@ -149,8 +142,9 @@ int main(void)
 
   Machine_Initialise(&stateMachine, &ble_device, &reader, GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_LED_B_GPIO_Port, GPIO_LED_B_Pin, GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin);
 
-  Init_RFID(&reader, GPIO_RFID_DATA_GPIO_Port, GPIO_RFID_CLK_GPIO_Port, GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_DATA_Pin, GPIO_RFID_CLK_Pin, GPIO_RFID_MODU_Pin);
+  RFID_Initialise(&reader, GPIO_RFID_DATA_GPIO_Port, GPIO_RFID_CLK_GPIO_Port, GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_DATA_Pin, GPIO_RFID_CLK_Pin, GPIO_RFID_MODU_Pin);
   HAL_TIM_Base_Start(&htim21);
+
   BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin);
 
   Gauge_initialise(&gauge, &hi2c1);
@@ -174,7 +168,6 @@ int main(void)
 	  	  case WAITING_FOR_RFID_STATE:
 	  		  if(reader.tag != 0) // got tag - condition to do
 			  {
-	  			//HAL_Delay(500); // tests
 	  			  rfid_found(&stateMachine);
 	  			  BLE_Send(&ble_device, "OK\n\r");
 
@@ -188,10 +181,9 @@ int main(void)
 	  		  break;
 
 	  	  case RFID_FOUND_STATE:
-	  		  //if(BLE_is_connected(&ble_device) == HAL_OK && ble_device.connection == 1) // got connection - condition to do
-	  		  if(1) // FAKE BLE TEST
+	  		  if(BLE_is_connected(&ble_device) == HAL_OK && ble_device.connection == 1) // got connection - condition to do
+	  		  //if(1) // FAKE BLE TEST
 			  {
-	  			HAL_Delay(500); // tests
 	  			ble_found(&stateMachine);
 			  }
 			  else if(HAL_GetTick() - stateMachine.RFIDStartTime >= BLE_TIMEOUT)
