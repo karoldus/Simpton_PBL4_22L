@@ -5,6 +5,7 @@
  *      Author: michal
  */
 #include "mlx90109cdc.h"
+
 void Init_RFID(RFID_Data *reader, GPIO_TypeDef *rfid_data_port, GPIO_TypeDef *rfid_clk_port, GPIO_TypeDef *rfid_modu_port, uint16_t rfid_data_pin, uint16_t rfid_clk_pin, uint16_t rfid_modu_pin)
 {
 	reader->rfid_data_pin = rfid_data_pin;
@@ -29,6 +30,7 @@ void Init_RFID(RFID_Data *reader, GPIO_TypeDef *rfid_data_port, GPIO_TypeDef *rf
 	}
 	reader->history_len = 0;
 }
+
 
 void Read_RFID(RFID_Data *reader, TIM_HandleTypeDef* htim2)
 {
@@ -61,7 +63,6 @@ void Read_RFID(RFID_Data *reader, TIM_HandleTypeDef* htim2)
 		}
 		if(reader->goodClkCounter==RFID_BUFFER_SIZE-1)
 		{
-			//HAL_GPIO_TogglePin(reader->rfid_led_port, reader->rfid_led_pin);
 			uint64_t a = AnalyzeBuff(reader);
 
 			if(a != 0)
@@ -92,7 +93,6 @@ void Read_RFID(RFID_Data *reader, TIM_HandleTypeDef* htim2)
 							temp = (temp << i);
 							reader->tag += temp;
 						}
-
 					}
 
 					reader->history_len = 0;
@@ -101,8 +101,6 @@ void Read_RFID(RFID_Data *reader, TIM_HandleTypeDef* htim2)
 					{
 						reader->history[i]=0;
 					}
-
-
 				}
 			}
 
@@ -120,12 +118,9 @@ void Read_RFID(RFID_Data *reader, TIM_HandleTypeDef* htim2)
 			}
 		}
 	}
-//	else
-//	{
-//		printf("ERROR while reading pin state (NOT 0 or 1)\r\n");
-//	}
-
 }
+
+
 uint64_t AnalyzeBuff(RFID_Data *reader)
 {
 	GPIO_PinState data[RFID_BUFFER_SIZE-16];
@@ -169,16 +164,9 @@ uint64_t AnalyzeBuff(RFID_Data *reader)
 					{
 						tagid = tagid + pow(2,k);
 					}
-//					else
-//					{
-//						printf("ERROR Wrong Data!!!\r\n");
-//					}
 				}
 
 				return tagid;
-
-
-
 			}
 		}
 		else
@@ -187,12 +175,11 @@ uint64_t AnalyzeBuff(RFID_Data *reader)
 		iterator++;
 	}
 	return 0;
-
-	//return data;
 }
+
+
 void StartTim(RFID_Data* reader, TIM_HandleTypeDef* htim21)
 {
-
 	HAL_TIM_Base_Stop(htim21);
 	reader->low_time=TIM2->CNT;
 	HAL_TIM_Base_Start(htim21);
