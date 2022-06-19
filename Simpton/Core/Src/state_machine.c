@@ -26,6 +26,8 @@ uint8_t Machine_Initialise(StateMachine *stateMachine, BLE *ble_device, RFID_Dat
 
 	stateMachine->moduGPIOPort = moduGPIOPort;
 	stateMachine->moduGPIOPin = moduGPIOPin;
+
+	return 1;
 }
 
 
