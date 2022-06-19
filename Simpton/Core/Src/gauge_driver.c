@@ -30,7 +30,7 @@ HAL_StatusTypeDef Gauge_read_batt_voltage( GAUGE *dev ){
 
 	uint16_t data4 = 0;
 
-	HAL_StatusTypeDef status = MAX17201_read_regs(&gauge, MAX1720X_VCELL_ADDR, &data4, 2);
+	HAL_StatusTypeDef status = MAX17201_read_regs(dev->i2cHandle, MAX1720X_VCELL_ADDR, &data4, 2);
 
 	dev->batt_voltage = data4;
 
@@ -43,7 +43,7 @@ HAL_StatusTypeDef Gauge_read_main_voltage( GAUGE *dev ){
 
 	uint16_t data5 = 0;
 
-	HAL_StatusTypeDef status = MAX17201_read_reg(dev->i2cHandle, MAX1720X_VBAT_ADDR, regData);
+	HAL_StatusTypeDef status = MAX17201_read_regs(dev->i2cHandle, MAX1720X_VBAT_ADDR, &data5, 2);
 
 	dev->main_voltage = data5;
 
@@ -54,7 +54,7 @@ HAL_StatusTypeDef Gauge_read_gauge_temp( GAUGE *dev ){
 
 	uint16_t data6 = 0;
 
-	HAL_StatusTypeDef status = MAX17201_read_reg(dev->i2cHandle, MAX1720X_TEMP_ADDR, regData);
+	HAL_StatusTypeDef status = MAX17201_read_regs(dev->i2cHandle, MAX1720X_TEMP_ADDR, &data6, 2);
 
 	dev->temperatue = data6;
 
@@ -67,7 +67,7 @@ HAL_StatusTypeDef Gauge_read_capacity( GAUGE *dev ){
 
 	uint16_t data7 = 0;
 
-	HAL_StatusTypeDef status = MAX17201_read_regs(dev->i2cHandle, MAX1720X_REPSOC_ADDR, regData, 2);
+	HAL_StatusTypeDef status = MAX17201_read_regs(dev->i2cHandle, MAX1720X_REPSOC_ADDR, &data7, 2);
 
 	dev->capacity = data7;
 

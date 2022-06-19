@@ -38,9 +38,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- I2C_HandleTypeDef hi2c1;
-
-TIM_HandleTypeDef htim21;
+ TIM_HandleTypeDef htim21;
 
 UART_HandleTypeDef huart2;
 
@@ -52,9 +50,9 @@ BLE ble_device;
 
 RFID_Data reader;
 
-GAUGE gauge;
+//GAUGE gauge;
 
-uint8_t gaugeDataReady; //for external interrupt
+//uint8_t gaugeDataReady; //for external interrupt
 
 /* USER CODE END PV */
 
@@ -63,7 +61,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM21_Init(void);
-static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -94,10 +91,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	  // read rfid
 	  RFID_Interrupt_handler(&reader,&htim21);
   }
-  else if ( GPIO_Pin == GPIO_ZAS_ALERT_Pin )
-  {   // gauge interrupt
-		gaugeDataReady = 1;
-  }
+//  else if ( GPIO_Pin == GPIO_ZAS_ALERT_Pin )
+//  {   // gauge interrupt
+//		gaugeDataReady = 1;
+//  }
 }
 
 
@@ -137,7 +134,6 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_TIM21_Init();
-  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
   Machine_Initialise(&stateMachine, &ble_device, &reader, GPIO_LED_R_GPIO_Port, GPIO_LED_R_Pin, GPIO_LED_G_GPIO_Port, GPIO_LED_G_Pin, GPIO_LED_B_GPIO_Port, GPIO_LED_B_Pin, GPIO_RFID_MODU_GPIO_Port, GPIO_RFID_MODU_Pin);
@@ -147,7 +143,7 @@ int main(void)
 
   BLE_Initialise( &ble_device, &huart2, GPIO_BLE_TX_IND_GPIO_Port, GPIO_BLE_TX_IND_Pin);
 
-  Gauge_initialise(&gauge, &hi2c1);
+  //Gauge_initialise(&gauge, &hi2c1);
 
   /* USER CODE END 2 */
 
@@ -244,61 +240,12 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_I2C1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
   PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-  PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief I2C1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_I2C1_Init(void)
-{
-
-  /* USER CODE BEGIN I2C1_Init 0 */
-
-  /* USER CODE END I2C1_Init 0 */
-
-  /* USER CODE BEGIN I2C1_Init 1 */
-
-  /* USER CODE END I2C1_Init 1 */
-  hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x00707CBB;
-  hi2c1.Init.OwnAddress1 = 0;
-  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2 = 0;
-  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Analogue filter
-  */
-  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Digital filter
-  */
-  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN I2C1_Init 2 */
-
-  /* USER CODE END I2C1_Init 2 */
-
 }
 
 /**
