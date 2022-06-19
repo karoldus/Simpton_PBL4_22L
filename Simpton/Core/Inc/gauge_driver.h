@@ -14,9 +14,16 @@ typedef struct {																							//example gauge structure
 
 	I2C_HandleTypeDef *i2cHandle;
 
-	float current;
+	uint16_t main_voltage;
 
-	float capacity;
+	uint16_t batt_voltage;
+
+	uint16_t temperatue;
+
+	uint16_t capacity;
+
+
+
 
 } GAUGE;
 
