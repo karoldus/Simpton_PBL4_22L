@@ -1,6 +1,6 @@
 # Simpton - smart wireless button with RFID
 
-![Simpton](img\simpton-all.jpg)
+![Simpton](img/simpton-all.jpg)
 
 ## Overview
 
@@ -32,7 +32,7 @@ It was created by Karol Duszczyk, Michał Twarowski and Kamil Wieteska on PBL-4 
 
 ### Schematic
 
-![Schematic](img\sch.png)
+![Schematic](img/sch.png)
 
 Schematic was created in Altium Designer. It has 6 parts:
 - capacitive button, LED by Karol
@@ -42,7 +42,7 @@ Schematic was created in Altium Designer. It has 6 parts:
 
 ### PCB
 
-![Schematic](img\pcb.png)
+![Schematic](img/pcb.png)
 
 ## Bugs found
 
