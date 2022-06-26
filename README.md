@@ -58,6 +58,8 @@ Schematic was created in Altium Designer. It has 6 parts:
 
 ## Results
 
+![Simpton movie](img/simpton-gif.gif)
+
 We created working prototype without gauge.
 
 Working cycle:
@@ -65,12 +67,12 @@ Working cycle:
 2. Wake up when button pressed (by interrupt)
 3. Power on BLE and blink blue LED
 4. Power on RFID reader and wait up to 10 s to read RFID card
-    1. If no card was presented turn off RFID and BLE, blink red led and go sleep (return to point 1)
+    1. If no card was presented turn off RFID and BLE, blink red led and go to sleep (return to point 1)
 5. Blink green LED once. If there isn't BLE connection wait up to 10 s to get it.
-    1. If there still isn't connection turn off RFID and BLE, blink red led twice and go sleep (return to point 1)
+    1. If there still isn't connection turn off RFID and BLE, blink red led twice and go to sleep (return to point 1)
 6. Send RFID tag number by BLE and blink green LED twice
 7. (not implemented) Read battery status from gauge and send it by BLE
-8. Turn off RFID and BLE and go sleep (return to point 1)
+8. Turn off RFID and BLE and go to sleep (return to point 1)
 
 Every device module has it's own driver and library for it's hardware part.
 
