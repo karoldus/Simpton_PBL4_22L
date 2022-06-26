@@ -56,11 +56,15 @@ Schematic was created in Altium Designer. It has 6 parts:
 - STM32CubeIDE
 - Segger J-Link EDU
 
-## Results
+## Code
 
-![Simpton movie](img/simpton-gif.gif)
+Every device module has it's own driver and library for it's hardware part.
 
-We created working prototype without a power gauge.
+Code modules:
+- state_machine - simple state machine by Karol
+- rfid_driver & mlx90109cdc - RFID library by Michał
+- gauge_driver & max17201 - gauge library by Kamil
+- ble_driver & rn4870 - BLE library by Karol
 
 Working cycle:
 1. Sleep
@@ -74,13 +78,13 @@ Working cycle:
 7. (not implemented) Read battery status from gauge and send it by BLE
 8. Turn off RFID and BLE and go to sleep (return to point 1)
 
-Every device module has it's own driver and library for it's hardware part.
 
-Code modules:
-- state_machine - simple state machine by Karol
-- rfid_driver & mlx90109cdc - RFID library by Michał
-- gauge_driver & max17201 - gauge library by Kamil
-- ble_driver & rn4870 - BLE library by Karol
+
+## Results
+
+![Simpton movie](img/simpton-gif.gif)
+
+We created working prototype without a power gauge.
 
 ## Bugs found
 
