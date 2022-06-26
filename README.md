@@ -60,7 +60,7 @@ Schematic was created in Altium Designer. It has 6 parts:
 
 ![Simpton movie](img/simpton-gif.gif)
 
-We created working prototype without gauge.
+We created working prototype without a power gauge.
 
 Working cycle:
 1. Sleep
